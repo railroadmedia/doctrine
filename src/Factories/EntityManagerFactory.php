@@ -15,7 +15,7 @@ class EntityManagerFactory
     protected $container;
 
     public function __construct(
-        Container $container,
+        Container $container
     ) {
         $this->container = $container;
     }
