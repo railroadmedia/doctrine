@@ -15,8 +15,6 @@ use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Gedmo\DoctrineExtensions;
 use Gedmo\Timestampable\TimestampableListener;
-use Railroad\Doctrine\Services\ManagerRegistry;
-use Railroad\Doctrine\Factories\EntityManagerFactory;
 use Redis;
 
 class DoctrineServiceProvider extends ServiceProvider
@@ -66,14 +64,16 @@ class DoctrineServiceProvider extends ServiceProvider
             $cachedAnnotationReader
         );
 
-        $annotationDriver = new AnnotationDriver(
-            $cachedAnnotationReader, [config('doctrine.entities_path')]
-        );
+        foreach (config('doctrine.entities') as $driverConfig) {
+            $annotationDriver = new AnnotationDriver(
+                $cachedAnnotationReader, $driverConfig['path']
+            );
 
-        $driverChain->addDriver(
-            $annotationDriver,
-            config('doctrine.entitites_namespace')
-        );
+            $driverChain->addDriver(
+                $annotationDriver,
+                $driverConfig['namespace']
+            );
+        }
 
         // driver chain instance is referenced in laravel container to be reused when needed
         app()->instance(MappingDriverChain::class, $driverChain);
@@ -104,9 +104,6 @@ class DoctrineServiceProvider extends ServiceProvider
         // orm configuration instance is referenced in laravel container to be reused when needed
         app()->instance(Configuration::class, $ormConfiguration);
 
-        $entityManagerFactory = new EntityManagerFactory(app());
-        app()->instance(EntityManagerFactory::class, $entityManagerFactory);
-
         if (config('doctrine.database_in_memory') !== true) {
             $databaseOptions = [
                 'driver' => config('doctrine.database_driver'),
@@ -125,10 +122,13 @@ class DoctrineServiceProvider extends ServiceProvider
         }
 
         // register the default entity manager
-        $defaultEntityManager = $entityManagerFactory->createEntityManager($databaseOptions);
+        $entityManager = EntityManager::create(
+            $databaseOptions,
+            $ormConfiguration,
+            $eventManager
+        );
 
-        // register the registry
-        $entityManagerRegistry = new ManagerRegistry(app(), $defaultEntityManager);
-        app()->instance(ManagerRegistry::class, $entityManagerRegistry);
+        // register the entity manager as a singleton
+        app()->instance(EntityManager::class, $entityManager);
     }
 }

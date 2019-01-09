@@ -15,6 +15,10 @@ return [
     'database_driver' => 'pdo_mysql',
     'database_in_memory' => false,
 
-    'entities_path' => __DIR__ . '/../src/Entities',
-    'entitites_namespace' => 'Railroad\Ecommerce\Entities'
+    'entities' => [
+        [
+            'path' => __DIR__ . '/../src/Entities',
+            'namespace' => 'Railroad\Doctrine\Entities'
+        ]
+    ],
 ];
