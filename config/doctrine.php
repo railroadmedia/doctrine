@@ -1,10 +1,6 @@
 <?php
 
 return [
-	'database_connection_name' => 'mysql',
-    'connection_mask_prefix' => 'doctrine_',
-    'data_mode' => 'host',
-
     'redis_host' => 'redis',
     'redis_port' => 6379,
 

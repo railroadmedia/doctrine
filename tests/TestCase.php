@@ -20,6 +20,10 @@ class TestCase extends BaseTestCase
      */
     protected function getEnvironmentSetUp($app)
     {
+        $config = config()->get('doctrine', []);
+
+        config()->set('doctrine', array_merge(require __DIR__ . '/../config/doctrine.php', $config));
+
         $app->register(DoctrineServiceProvider::class);
     }
 }
