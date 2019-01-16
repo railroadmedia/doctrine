@@ -2,9 +2,8 @@
 
 namespace Railroad\Doctrine\Providers;
 
-use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\EventManager;
@@ -15,6 +14,7 @@ use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Gedmo\DoctrineExtensions;
 use Gedmo\Timestampable\TimestampableListener;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Redis;
 
 class DoctrineServiceProvider extends ServiceProvider
@@ -33,6 +33,8 @@ class DoctrineServiceProvider extends ServiceProvider
      * Register the application services.
      *
      * @return void
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function register()
     {
