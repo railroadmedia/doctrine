@@ -6,10 +6,8 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use League\Fractal\Pagination\DoctrinePaginatorAdapter;
 use League\Fractal\Serializer\ArraySerializer;
-use League\Fractal\Serializer\JsonApiSerializer;
 use League\Fractal\TransformerAbstract;
-use Railroad\Usora\Routes\PaginationUrlGenerator;
-use Railroad\Usora\Transformers\UserTransformer;
+use Railroad\Doctrine\Routes\PaginationUrlGenerator;
 use Spatie\Fractal\Fractal;
 
 class FractalResponseService
