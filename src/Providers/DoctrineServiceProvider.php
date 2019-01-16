@@ -10,6 +10,7 @@ use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Gedmo\DoctrineExtensions;
@@ -132,5 +133,6 @@ class DoctrineServiceProvider extends ServiceProvider
 
         // register the entity manager as a singleton
         app()->instance(EntityManager::class, $entityManager);
+        app()->instance(EntityManagerInterface::class, $entityManager);
     }
 }
