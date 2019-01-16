@@ -1,27 +1,15 @@
 <?php
 
-namespace Railroad\Doctrine\Services;
+namespace Railroad\Doctrine\Requests;
 
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Http\FormRequest;
 use Throwable;
 
-class RequestHandler
+class EntityHydratorRequest extends FormRequest
 {
-    /**
-     * @var EntityManager
-     */
-    protected $entityManager;
-
-    /**
-     * @param EntityManager $entityManager
-     */
-    public function __construct(EntityManager $entityManager)
-    {
-        $this->entityManager = $entityManager;
-    }
-
     /**
      * Checks entityData keys
      * adds camelCase keys if snake or kebab cases are found
@@ -57,21 +45,16 @@ class RequestHandler
     }
 
     /**
-     * Populates an entity with request data
+     * Populates an entity with current request data
      *
      * @param string|object $target - entity
-     * @param Request $request
      * @param bool $normalize
      *
      * @return mixed
      */
-    public function fromRequest(
-        $target,
-        Request $request,
-        bool $normalize = true
-    ) {
+    public function fromRequest($target, bool $normalize = true) {
 
-        return $this->fromArray($target, $request->all(), $normalize);
+        return $this->fromArray($target, $this->all(), $normalize);
     }
 
     /**
@@ -90,6 +73,7 @@ class RequestHandler
         array $entityData,
         bool $normalize = true
     ) {
+        $entityManager = $this->container->make(EntityManager::class);
 
         $normalizedEntityData = $normalize ?
             self::camelize($entityData) : $entityData;
@@ -102,7 +86,7 @@ class RequestHandler
         /**
          * @var $classMeta \Doctrine\ORM\Mapping\ClassMetadata
          */
-        $classMeta = $this->entityManager->getClassMetadata($targetClass);
+        $classMeta = $entityManager->getClassMetadata($targetClass);
 
         // handle basic entity mapping
         /**
@@ -120,8 +104,9 @@ class RequestHandler
                     $value = $normalizedEntityData[$property];
 
                     if (
-                        $classMeta->getTypeOfField($property) == 'datetime' &&
-                        !is_object($value) // prop value already parsed
+                        $value
+                        && $classMeta->getTypeOfField($property) == 'datetime'
+                        && !is_object($value) // prop value already parsed
                     ) {
                         // entities expect \DateTimeInterface objects values
                         $value = Carbon::parse($value);
@@ -140,12 +125,13 @@ class RequestHandler
 
         foreach ($associations as $assocName) {
 
-            if (
-                isset($normalizedEntityData[$assocName])
-                || isset($normalizedEntityData[$assocName . 'Id'])
-            ) {
+            $setter = 'set' . ucfirst($assocName);
 
-                $setter = 'set' . ucfirst($assocName);
+            if (
+                method_exists($targetObject, $setter)
+                && (isset($normalizedEntityData[$assocName])
+                    || isset($normalizedEntityData[$assocName . 'Id']))
+            ) {
 
                 // searches for 'property' or 'propertyId'
                 // includes transformed request keys 'property_id' or 'property-id'
@@ -159,7 +145,7 @@ class RequestHandler
 
                     // this creates a doctrine proxy entity
                     // avoids querying the database for the related entity
-                    $reference = $this->entityManager->getReference(
+                    $reference = $entityManager->getReference(
                         $associatedEntity,
                         $associationId
                     );
