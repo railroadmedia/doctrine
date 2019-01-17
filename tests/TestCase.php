@@ -2,14 +2,56 @@
 
 namespace Railroad\Doctrine\Tests;
 
+use Doctrine\ORM\EntityManager;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 use Railroad\Doctrine\Providers\DoctrineServiceProvider;
 
 class TestCase extends BaseTestCase
 {
+    /**
+     * @var EntityManager
+     */
+    protected $entityManager;
+
     protected function setUp()
     {
         parent::setUp();
+
+        // Run the schema update tool using our entity metadata
+        $this->entityManager = app(EntityManager::class);
+
+        $this->entityManager->getMetadataFactory()
+            ->getCacheDriver()
+            ->deleteAll();
+
+        // make sure laravel is using the same connection
+        DB::connection()
+            ->setPdo(
+                $this->entityManager->getConnection()
+                    ->getWrappedConnection()
+            );
+
+        DB::connection()
+            ->setReadPdo(
+                $this->entityManager->getConnection()
+                    ->getWrappedConnection()
+            );
+
+        Schema::create(
+            'users',
+            function (Blueprint $table) {
+                $table->temporary();
+                $table->increments('id');
+                $table->timestamp('some_time');
+                $table->date('some_date');
+                $table->dateTime('some_date_time');
+                $table->dateTimeTz('some_date_time_tz');
+                $table->timestamps();
+            }
+        );
     }
 
     /**
@@ -23,6 +65,34 @@ class TestCase extends BaseTestCase
         $config = config()->get('doctrine', []);
 
         config()->set('doctrine', array_merge(require __DIR__ . '/../config/doctrine.php', $config));
+
+        // doctrine db
+        config()->set('doctrine.development_mode', $defaultConfig['development_mode'] ?? true);
+        config()->set('doctrine.database_driver', 'pdo_sqlite');
+        config()->set('doctrine.database_user', 'root');
+        config()->set('doctrine.database_password', 'root');
+        config()->set('doctrine.database_in_memory', true);
+
+        // laravel db
+        config()->set('database.default', config('usora.connection_mask_prefix') . 'sqlite');
+        config()->set(
+            'database.connections.' . config('usora.connection_mask_prefix') . 'sqlite',
+            [
+                'driver' => 'sqlite',
+                'database' => ':memory:',
+                'prefix' => '',
+            ]
+        );
+
+        config()->set(
+            'doctrine.entities',
+            [
+                [
+                    'path' => __DIR__ . '/Fixtures',
+                    'namespace' => 'Railroad\Doctrine\Tests\Fixtures',
+                ],
+            ]
+        );
 
         $app->register(DoctrineServiceProvider::class);
     }

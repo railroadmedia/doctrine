@@ -8,14 +8,23 @@ use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Gedmo\DoctrineExtensions;
-use Gedmo\Timestampable\TimestampableListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Railroad\Doctrine\TimestampableListener;
+use Railroad\Doctrine\Types\CarbonDateImmutableType;
+use Railroad\Doctrine\Types\CarbonDateTimeImmutableType;
+use Railroad\Doctrine\Types\CarbonDateTimeTimezoneImmutableType;
+use Railroad\Doctrine\Types\CarbonDateTimeTimezoneType;
+use Railroad\Doctrine\Types\CarbonDateTimeType;
+use Railroad\Doctrine\Types\CarbonDateType;
+use Railroad\Doctrine\Types\CarbonTimeImmutableType;
+use Railroad\Doctrine\Types\CarbonTimeType;
 use Redis;
 
 class DoctrineServiceProvider extends ServiceProvider
@@ -24,6 +33,7 @@ class DoctrineServiceProvider extends ServiceProvider
      * Bootstrap the application services.
      *
      * @return void
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function boot()
     {
@@ -36,11 +46,20 @@ class DoctrineServiceProvider extends ServiceProvider
      * @return void
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function register()
     {
+        // use Carbon for all date types
+        Type::overrideType('datetime', CarbonDateTimeType::class);
+        Type::overrideType('datetimetz', CarbonDateTimeTimezoneType::class);
+        Type::overrideType('date', CarbonDateType::class);
+        Type::overrideType('time', CarbonTimeType::class);
+
+        // set proxy dir to temp folder on server
         $proxyDir = sys_get_temp_dir();
 
+        // setup redis
         $redis = new Redis();
         $redis->connect(
             config('doctrine.redis_host'),
