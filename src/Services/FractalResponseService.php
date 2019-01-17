@@ -4,6 +4,7 @@ namespace Railroad\Doctrine\Services;
 
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Illuminate\Http\JsonResponse;
 use League\Fractal\Pagination\DoctrinePaginatorAdapter;
 use League\Fractal\Serializer\ArraySerializer;
 use League\Fractal\TransformerAbstract;
@@ -43,6 +44,43 @@ class FractalResponseService
                     new Paginator($queryBuilder), [PaginationUrlGenerator::class, 'generate']
                 )
             );
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param int $statusCode
+     * @param array $headers
+     * @param int $options
+     * @return JsonResponse
+     */
+    public static function empty($statusCode = 200, $headers = [], $options = 0)
+    {
+        $response = new JsonResponse();
+
+        if (is_int($statusCode)) {
+            $response->setStatusCode($statusCode);
+        }
+
+        if (is_array($headers)) {
+            return $response->withHeaders($headers);
+        }
+
+        if (is_int($options)) {
+            $response->setEncodingOptions($options);
+        }
+
+        if (is_callable($options)) {
+            $options($response);
+        }
+
+        if (is_callable($statusCode)) {
+            $statusCode($response);
+        }
+
+        if (is_callable($headers)) {
+            $headers($response);
         }
 
         return $response;
