@@ -17,6 +17,10 @@ class CarbonDateTimeTimezoneType extends DateTimeTzType
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
+        if ($value === null) {
+            return $value;
+        }
+
         return Carbon::instance(parent::convertToPHPValue($value, $platform));
     }
 }

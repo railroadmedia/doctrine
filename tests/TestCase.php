@@ -52,6 +52,19 @@ class TestCase extends BaseTestCase
                 $table->timestamps();
             }
         );
+
+        Schema::create(
+            'coupons',
+            function (Blueprint $table) {
+                $table->temporary();
+                $table->increments('id');
+                $table->timestamp('used_at_time')->nullable();
+                $table->date('used_at_date')->nullable();
+                $table->dateTime('used_at_datetime')->nullable();
+                $table->dateTimeTz('used_at_datetimetz')->nullable();
+                $table->timestamps();
+            }
+        );
     }
 
     /**
