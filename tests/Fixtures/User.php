@@ -23,7 +23,7 @@ class User
     protected $id;
 
     /**
-     * @var integer
+     * @var Carbon
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="time")
      */
@@ -53,13 +53,13 @@ class User
     /**
      * @return int
      */
-    public function getId(): int
+    public function getId()
     {
         return $this->id;
     }
 
     /**
-     * @return int
+     * @return Carbon
      */
     public function getSomeTime()
     {
@@ -67,7 +67,7 @@ class User
     }
 
     /**
-     * @param int $someTime
+     * @param Carbon $someTime
      */
     public function setSomeTime($someTime)
     {
