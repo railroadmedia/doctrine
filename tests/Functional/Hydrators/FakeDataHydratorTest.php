@@ -27,4 +27,16 @@ class FakeDataHydratorTest extends TestCase
         $this->assertEquals($user->getSomeDateTime(), $userAttributes['some_date_time']);
         $this->assertEquals($user->getSomeDateTimeTz(), $userAttributes['some_date_time_tz']);
     }
+    
+    public function test_attribute_array_just_array()
+    {
+        $class = new FakeDataHydrator($this->entityManager);
+
+        $userAttributes = $class->getAttributeArray(User::class, new UserTransformer());
+
+        $this->assertNotEmpty($userAttributes['some_time']);
+        $this->assertNotEmpty($userAttributes['some_date']);
+        $this->assertNotEmpty($userAttributes['some_date_time']);
+        $this->assertNotEmpty($userAttributes['some_date_time_tz']);
+    }
 }

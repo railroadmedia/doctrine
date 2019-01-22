@@ -67,10 +67,16 @@ class FakeDataHydrator
     /**
      * @param $entity
      * @param TransformerAbstract $transformerAbstract
+     * @param array $customColumnFormatters
      * @return mixed
      */
-    public function getAttributeArray($entity, TransformerAbstract $transformerAbstract)
+    public function getAttributeArray($entity, TransformerAbstract $transformerAbstract, $customColumnFormatters = [])
     {
+        if (!is_object($entity)) {
+            $entity = new $entity;
+            $this->fill($entity, $customColumnFormatters);
+        }
+
         $arrayData = $transformerAbstract->transform($entity);
 
         return $arrayData;
