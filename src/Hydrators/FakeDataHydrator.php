@@ -14,11 +14,12 @@ class FakeDataHydrator
     /**
      * @var EntityManagerInterface
      */
-    private $entityManager;
+    protected $entityManager;
+
     /**
      * @var Generator
      */
-    private $faker;
+    protected $faker;
 
     /**
      * FakeDataHydrator constructor.
