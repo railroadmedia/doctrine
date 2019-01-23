@@ -17,14 +17,14 @@ use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Gedmo\DoctrineExtensions;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Railroad\Doctrine\TimestampableListener;
-use Railroad\Doctrine\Types\CarbonDateImmutableType;
-use Railroad\Doctrine\Types\CarbonDateTimeImmutableType;
-use Railroad\Doctrine\Types\CarbonDateTimeTimezoneImmutableType;
-use Railroad\Doctrine\Types\CarbonDateTimeTimezoneType;
-use Railroad\Doctrine\Types\CarbonDateTimeType;
-use Railroad\Doctrine\Types\CarbonDateType;
-use Railroad\Doctrine\Types\CarbonTimeImmutableType;
-use Railroad\Doctrine\Types\CarbonTimeType;
+use Railroad\Doctrine\Types\Carbon\CarbonDateTimeTimezoneType;
+use Railroad\Doctrine\Types\Carbon\CarbonDateTimeType;
+use Railroad\Doctrine\Types\Carbon\CarbonDateType;
+use Railroad\Doctrine\Types\Carbon\CarbonTimeType;
+use Railroad\Doctrine\Types\Domain\GenderType;
+use Railroad\Doctrine\Types\Domain\PhoneNumberType;
+use Railroad\Doctrine\Types\Domain\TimezoneType;
+use Railroad\Doctrine\Types\Domain\UrlType;
 use Redis;
 
 class DoctrineServiceProvider extends ServiceProvider
@@ -55,6 +55,11 @@ class DoctrineServiceProvider extends ServiceProvider
         Type::overrideType('datetimetz', CarbonDateTimeTimezoneType::class);
         Type::overrideType('date', CarbonDateType::class);
         Type::overrideType('time', CarbonTimeType::class);
+
+        !Type::hasType('url') ? Type::addType('url', UrlType::class) : null;
+        !Type::hasType('phone_number') ? Type::addType('phone_number', PhoneNumberType::class) : null;
+        !Type::hasType('timezone') ? Type::addType('timezone', TimezoneType::class) : null;
+        !Type::hasType('gender') ? Type::addType('gender', GenderType::class) : null;
 
         // set proxy dir to temp folder on server
         $proxyDir = sys_get_temp_dir();

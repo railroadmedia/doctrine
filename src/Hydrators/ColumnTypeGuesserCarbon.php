@@ -13,7 +13,7 @@ class ColumnTypeGuesserCarbon extends ColumnTypeGuesser
     /**
      * @param $fieldName
      * @param ClassMetadata $class
-     * @return Carbon|Closure|null
+     * @return Carbon|Closure|string|null
      */
     public function guessFormat($fieldName, ClassMetadata $class)
     {
@@ -27,6 +27,24 @@ class ColumnTypeGuesserCarbon extends ColumnTypeGuesser
         // - Caleb Jan 2019
         if ($class->getTypeOfField($fieldName) == 'datetimetz') {
             return Carbon::instance($this->generator->dateTime);
+        }
+
+        if ($class->getTypeOfField($fieldName) == 'url') {
+            return $this->generator->url;
+        }
+
+        $type = $class->getTypeOfField($fieldName);
+        switch ($type) {
+            case 'datetimetz':
+                return Carbon::instance($this->generator->dateTime);
+            case 'url':
+                return $this->generator->url;
+            case 'phone_number':
+                return $this->generator->phoneNumber;
+            case 'timezone':
+                return $this->generator->randomElement(timezone_identifiers_list());
+            case 'gender':
+                return $this->generator->randomElement(['male', 'female', 'other']);
         }
 
         return $value;

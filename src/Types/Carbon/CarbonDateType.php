@@ -1,6 +1,6 @@
 <?php
 
-namespace Railroad\Doctrine\Types;
+namespace Railroad\Doctrine\Types\Carbon;
 
 use Carbon\Carbon;
 use Doctrine\DBAL\Platforms\AbstractPlatform;

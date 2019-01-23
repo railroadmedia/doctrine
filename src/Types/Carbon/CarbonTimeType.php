@@ -1,13 +1,14 @@
 <?php
 
-namespace Railroad\Doctrine\Types;
+namespace Railroad\Doctrine\Types\Carbon;
 
 use Carbon\Carbon;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
-use Doctrine\DBAL\Types\DateTimeType;
+use Doctrine\DBAL\Types\DateType;
+use Doctrine\DBAL\Types\TimeType;
 
-class CarbonDateTimeType extends DateTimeType
+class CarbonTimeType extends TimeType
 {
     /**
      * @param $value

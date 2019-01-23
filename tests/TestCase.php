@@ -3,6 +3,8 @@
 namespace Railroad\Doctrine\Tests;
 
 use Doctrine\ORM\EntityManager;
+use Faker\Factory;
+use Faker\Generator;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -16,9 +18,16 @@ class TestCase extends BaseTestCase
      */
     protected $entityManager;
 
+    /**
+     * @var Generator
+     */
+    protected $faker;
+
     protected function setUp()
     {
         parent::setUp();
+
+        $this->faker = Factory::create();
 
         // Run the schema update tool using our entity metadata
         $this->entityManager = app(EntityManager::class);
@@ -58,11 +67,27 @@ class TestCase extends BaseTestCase
             function (Blueprint $table) {
                 $table->temporary();
                 $table->increments('id');
-                $table->timestamp('used_at_time')->nullable();
-                $table->date('used_at_date')->nullable();
-                $table->dateTime('used_at_datetime')->nullable();
-                $table->dateTimeTz('used_at_datetimetz')->nullable();
+                $table->timestamp('used_at_time')
+                    ->nullable();
+                $table->date('used_at_date')
+                    ->nullable();
+                $table->dateTime('used_at_datetime')
+                    ->nullable();
+                $table->dateTimeTz('used_at_datetimetz')
+                    ->nullable();
                 $table->timestamps();
+            }
+        );
+
+        Schema::create(
+            'resources',
+            function (Blueprint $table) {
+                $table->temporary();
+                $table->increments('id');
+                $table->text('download_url');
+                $table->string('phone_number');
+                $table->string('timezone');
+                $table->string('gender');
             }
         );
     }
