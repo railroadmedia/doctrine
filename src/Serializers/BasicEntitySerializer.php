@@ -35,7 +35,7 @@ class BasicEntitySerializer
         $dataArray = [];
 
         foreach ($classMetadata->getFieldNames() as $fieldName) {
-            if ($classMetadata->isIdentifier($fieldName) || !$classMetadata->hasField($fieldName)) {
+            if (!$classMetadata->hasField($fieldName)) {
                 continue;
             }
 
