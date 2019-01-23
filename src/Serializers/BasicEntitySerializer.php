@@ -55,10 +55,16 @@ class BasicEntitySerializer
                     break;
                 case 'datetime':
                 case 'datetimetz':
-                case 'date':
-                case 'time':
                     $dataArray[$fieldName] =
                         $fieldValue instanceof Carbon ? $fieldValue->toDateTimeString() : $fieldValue;
+
+                    break;
+                case 'date':
+                    $dataArray[$fieldName] = $fieldValue instanceof Carbon ? $fieldValue->toDateString() : $fieldValue;
+
+                    break;
+                case 'time':
+                    $dataArray[$fieldName] = $fieldValue instanceof Carbon ? $fieldValue->timestamp : $fieldValue;
 
                     break;
                 case 'object':
