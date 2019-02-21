@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Gedmo\DoctrineExtensions;
+use Gedmo\Sortable\SortableListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Railroad\Doctrine\TimestampableListener;
 use Railroad\Doctrine\Types\Carbon\CarbonDateTimeTimezoneType;
@@ -108,8 +109,12 @@ class DoctrineServiceProvider extends ServiceProvider
         $timestampableListener = new TimestampableListener();
         $timestampableListener->setAnnotationReader($cachedAnnotationReader);
 
+        $sortableListener = new SortableListener();
+        $sortableListener->setAnnotationReader($cachedAnnotationReader);
+
         $eventManager = new EventManager();
         $eventManager->addEventSubscriber($timestampableListener);
+        $eventManager->addEventSubscriber($sortableListener);
 
         // event manager instance is referenced in laravel container to be reused when needed
         app()->instance(EventManager::class, $eventManager);
