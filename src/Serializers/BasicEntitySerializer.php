@@ -83,6 +83,8 @@ class BasicEntitySerializer
 
                     break;
                 case 'object':
+                    $dataArray[$fieldName] = $this->serialize($fieldValue);
+                    break;
                 case 'array':
                     $dataArray[$fieldName] = serialize($fieldValue);
                     break;
