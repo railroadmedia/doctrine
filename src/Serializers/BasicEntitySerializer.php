@@ -4,10 +4,21 @@ namespace Railroad\Doctrine\Serializers;
 
 use Carbon\Carbon;
 use Doctrine\Common\Inflector\Inflector;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 class BasicEntitySerializer
 {
+    /**
+     * @var EntityManager
+     */
+    private $entityManager;
+
+    public function __construct(EntityManager $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
     /**
      * @param $entity
      * @param ClassMetadata $classMetadata
@@ -30,8 +41,12 @@ class BasicEntitySerializer
      * @param ClassMetadata $classMetadata
      * @return array
      */
-    public function serialize($entity, ClassMetadata $classMetadata)
+    public function serialize($entity, ClassMetadata $classMetadata = null)
     {
+        if($classMetadata === null){
+            $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
+        }
+
         $dataArray = [];
 
         foreach ($classMetadata->getFieldNames() as $fieldName) {
