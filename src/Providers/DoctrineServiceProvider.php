@@ -133,6 +133,9 @@ class DoctrineServiceProvider extends ServiceProvider
             new UnderscoreNamingStrategy(CASE_LOWER)
         );
 
+        $ormConfiguration->addCustomStringFunction('MATCH_AGAINST','Railroad\\Doctrine\\Extensions\\Doctrine\\MatchAgainst');
+        $ormConfiguration->addCustomStringFunction('UNIX_TIMESTAMP','Railroad\\Doctrine\\Extensions\\Doctrine\\UnixTimestamp');
+
         // orm configuration instance is referenced in laravel container to be reused when needed
         app()->instance(Configuration::class, $ormConfiguration);
 
