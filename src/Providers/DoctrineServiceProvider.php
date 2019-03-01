@@ -26,6 +26,7 @@ use Railroad\Doctrine\Types\Domain\GenderType;
 use Railroad\Doctrine\Types\Domain\PhoneNumberType;
 use Railroad\Doctrine\Types\Domain\TimezoneType;
 use Railroad\Doctrine\Types\Domain\UrlType;
+use Railroad\Doctrine\Types\Domain\UserIdType;
 use Redis;
 
 class DoctrineServiceProvider extends ServiceProvider
@@ -61,6 +62,7 @@ class DoctrineServiceProvider extends ServiceProvider
         !Type::hasType('phone_number') ? Type::addType('phone_number', PhoneNumberType::class) : null;
         !Type::hasType('timezone') ? Type::addType('timezone', TimezoneType::class) : null;
         !Type::hasType('gender') ? Type::addType('gender', GenderType::class) : null;
+        !Type::hasType(UserIdType::USER_ID_TYPE) ? Type::addType(UserIdType::USER_ID_TYPE, UserIdType::class) : null;
 
         // set proxy dir to temp folder on server
         $proxyDir = sys_get_temp_dir();
@@ -162,6 +164,14 @@ class DoctrineServiceProvider extends ServiceProvider
             $ormConfiguration,
             $eventManager
         );
+
+        $entityManager
+            ->getConnection()
+            ->getDatabasePlatform()
+            ->registerDoctrineTypeMapping(
+                UserIdType::USER_ID_TYPE,
+                UserIdType::USER_ID_TYPE
+            );
 
         // register the entity manager as a singleton
         app()->instance(EntityManager::class, $entityManager);

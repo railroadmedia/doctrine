@@ -90,6 +90,24 @@ class TestCase extends BaseTestCase
                 $table->string('gender');
             }
         );
+
+        Schema::create(
+            'addresses',
+            function (Blueprint $table) {
+                $table->temporary();
+                $table->increments('id');
+                $table->unsignedInteger('user_id');
+            }
+        );
+
+        Schema::create(
+            'contacts',
+            function (Blueprint $table) {
+                $table->temporary();
+                $table->increments('id');
+                $table->unsignedInteger('user_id');
+            }
+        );
     }
 
     /**
