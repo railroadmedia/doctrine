@@ -238,4 +238,42 @@ class UserIdTypeTest extends TestCase
 
         $this->assertEquals($addressOne->getId(), $addressOneId);
     }
+
+    public function test_persist_null()
+    {
+        $address = new Address();
+
+        $this->entityManager->persist($address);
+        $this->entityManager->flush();
+
+        $addressId = $address->getId();
+
+        $this->entityManager->detach($address);
+        unset($address);
+
+        $this->assertDatabaseHas(
+            'addresses',
+            [
+                'id' => $addressId,
+                'user_id' => null
+            ]
+        );
+    }
+
+    public function test_fetch_null()
+    {
+        $addressId = $this->databaseManager
+            ->table('addresses')
+            ->insertGetId(['user_id' => null]);
+
+        $address = $this->entityManager->find(Address::class, $addressId);
+
+        $this->assertEquals(Address::class, get_class($address));
+
+        /**
+         * @var $address Address
+         */
+
+        $this->assertNull($address->getUserId());
+    }
 }

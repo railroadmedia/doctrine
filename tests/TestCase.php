@@ -96,7 +96,7 @@ class TestCase extends BaseTestCase
             function (Blueprint $table) {
                 $table->temporary();
                 $table->increments('id');
-                $table->unsignedInteger('user_id');
+                $table->unsignedInteger('user_id')->nullable();
             }
         );
 

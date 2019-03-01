@@ -16,16 +16,22 @@ class UserIdType extends IntegerType
 
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
-        $userProvider = app()->make('UserProviderInterface');
+        if ($value !== null) {
 
-        return $userProvider->getUserById($value);
+            $userProvider = app()->make('UserProviderInterface');
+
+            return $userProvider->getUserById($value);
+        }
     }
 
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        $userProvider = app()->make('UserProviderInterface');
+        if ($value !== null) {
 
-        return $userProvider->getUserId($value);
+            $userProvider = app()->make('UserProviderInterface');
+
+            return $userProvider->getUserId($value);
+        }
     }
 
     /**
