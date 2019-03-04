@@ -2,7 +2,7 @@
 
 namespace Railroad\Doctrine\Tests\Fixtures;
 
-use Railroad\Doctrine\Tests\Fixtures\UserEntityInterface;
+use Railroad\Doctrine\Contracts\UserEntityInterface;
 
 // not mapped, here
 class UserEntity implements UserEntityInterface

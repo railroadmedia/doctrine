@@ -1,8 +1,8 @@
 <?php
 
-namespace Railroad\Doctrine\Tests\Fixtures;
+namespace Railroad\Doctrine\Contracts;
 
-use Railroad\Doctrine\Tests\Fixtures\UserEntityInterface;
+use Railroad\Doctrine\Contracts\UserEntityInterface;
 
 interface UserProviderInterface
 {

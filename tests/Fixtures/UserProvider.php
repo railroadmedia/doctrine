@@ -3,8 +3,8 @@
 namespace Railroad\Doctrine\Tests\Fixtures;
 
 use Railroad\Doctrine\Tests\Fixtures\UserEntity;
-use Railroad\Doctrine\Tests\Fixtures\UserEntityInterface;
-use Railroad\Doctrine\Tests\Fixtures\UserProviderInterface;
+use Railroad\Doctrine\Contracts\UserEntityInterface;
+use Railroad\Doctrine\Contracts\UserProviderInterface;
 
 class UserProvider implements UserProviderInterface
 {

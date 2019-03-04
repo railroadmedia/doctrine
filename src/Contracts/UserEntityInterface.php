@@ -1,6 +1,6 @@
 <?php
 
-namespace Railroad\Doctrine\Tests\Fixtures;
+namespace Railroad\Doctrine\Contracts;
 
 interface UserEntityInterface
 {
