@@ -4,6 +4,7 @@ namespace Railroad\Doctrine\Types\Domain;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\IntegerType;
+use Railroad\Doctrine\Contracts\UserProviderInterface;
 
 class UserIdType extends IntegerType
 {
@@ -18,7 +19,7 @@ class UserIdType extends IntegerType
     {
         if ($value !== null) {
 
-            $userProvider = app()->make('UserProviderInterface');
+            $userProvider = app()->make(UserProviderInterface::class);
 
             return $userProvider->getUserById($value);
         }
@@ -28,7 +29,7 @@ class UserIdType extends IntegerType
     {
         if ($value !== null) {
 
-            $userProvider = app()->make('UserProviderInterface');
+            $userProvider = app()->make(UserProviderInterface::class);
 
             return $userProvider->getUserId($value);
         }

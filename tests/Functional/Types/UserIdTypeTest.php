@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use Doctrine\ORM\Query\Expr\Join;
 use Railroad\Doctrine\Tests\TestCase;
 use Illuminate\Database\DatabaseManager;
+use Railroad\Doctrine\Contracts\UserProviderInterface;
 use Railroad\Doctrine\Tests\Fixtures\Address;
 use Railroad\Doctrine\Tests\Fixtures\Contact;
 use Railroad\Doctrine\Tests\Fixtures\UserEntity;
@@ -19,12 +20,12 @@ class UserIdTypeTest extends TestCase
 
         $this->databaseManager = $this->app->make(DatabaseManager::class);
 
-        app()->instance('UserProviderInterface', new UserProvider()); // setup on implementation side
+        app()->instance(UserProviderInterface::class, new UserProvider());
     }
 
     public function test_persist()
     {
-        $userProvider = app()->make('UserProviderInterface');
+        $userProvider = app()->make(UserProviderInterface::class);
 
         $userId = rand();
 
@@ -80,7 +81,7 @@ class UserIdTypeTest extends TestCase
 
     public function test_where()
     {
-        $userProvider = app()->make('UserProviderInterface');
+        $userProvider = app()->make(UserProviderInterface::class);
 
         // seed two addresses
         $userIdOne = rand();
@@ -131,7 +132,7 @@ class UserIdTypeTest extends TestCase
 
     public function test_dql()
     {
-        $userProvider = app()->make('UserProviderInterface');
+        $userProvider = app()->make(UserProviderInterface::class);
 
         // seed two addresses
         $userIdOne = rand();
@@ -185,7 +186,7 @@ class UserIdTypeTest extends TestCase
 
     public function test_join()
     {
-        $userProvider = app()->make('UserProviderInterface');
+        $userProvider = app()->make(UserProviderInterface::class);
 
         // seed two addresses & two contacts
         $userOneId = rand();
