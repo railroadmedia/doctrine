@@ -8,7 +8,7 @@ use Railroad\Doctrine\Contracts\UserProviderInterface;
 
 class UserProvider implements UserProviderInterface
 {
-    public function getUserById(int $id): UserEntityInterface
+    public function getUserById(int $id): ?UserEntityInterface
     {
         return new UserEntity($id);
     }
