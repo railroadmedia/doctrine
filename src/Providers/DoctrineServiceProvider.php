@@ -9,6 +9,8 @@ use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Cache\DefaultCacheFactory;
+use Doctrine\ORM\Cache\RegionsConfiguration;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -125,6 +127,10 @@ class DoctrineServiceProvider extends ServiceProvider
         $ormConfiguration->setMetadataCacheImpl($redisCache);
         $ormConfiguration->setQueryCacheImpl($redisCache);
         $ormConfiguration->setResultCacheImpl($redisCache);
+        $factory = new DefaultCacheFactory(new RegionsConfiguration(), $redisCache);
+        $ormConfiguration->setSecondLevelCacheEnabled();
+        $ormConfiguration->getSecondLevelCacheConfiguration()->setCacheFactory($factory);
+
         $ormConfiguration->setProxyDir($proxyDir);
         $ormConfiguration->setProxyNamespace('DoctrineProxies');
         $ormConfiguration->setAutoGenerateProxyClasses(
