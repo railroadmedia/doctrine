@@ -1,6 +1,6 @@
 <?php
 
-if (! function_exists('key_array_of_entities_by')) {
+if (!function_exists('key_array_of_entities_by')) {
 
     /**
      * @param array $entities
@@ -13,7 +13,7 @@ if (! function_exists('key_array_of_entities_by')) {
 
         foreach ($entities as $entity) {
             if (method_exists($entity, $getterFunctionName)) {
-                $keyed[$entity->$getterFunctionName] = $entity;
+                $keyed[call_user_func([$entity, $getterFunctionName])] = $entity;
             }
         }
 
