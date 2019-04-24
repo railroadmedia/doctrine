@@ -18,6 +18,9 @@
     "orchestra/testbench": "~3.6"
   },
   "autoload": {
+    "files": [
+      "src/Helpers/entity_array_helpers.php"
+    ],
     "psr-4": {
       "Railroad\\Doctrine\\": "src"
     }
