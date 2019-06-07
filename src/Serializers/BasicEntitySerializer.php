@@ -19,6 +19,11 @@ class BasicEntitySerializer
         $formattedArray = [];
 
         foreach ($dataArray as $fieldName => $value) {
+
+            if(mb_check_encoding($value) == false){
+                $value = utf8_encode($value);
+            }
+
             $formattedArray[Inflector::tableize($fieldName)] = $value;
         }
 
