@@ -19,6 +19,7 @@ class FractalResponseService
      * @param TransformerAbstract $transformer
      * @param ArraySerializer $serializer
      * @param QueryBuilder|null $queryBuilder
+     * @param bool $useSimpleIdPagination
      * @return Fractal
      */
     public static function create(
@@ -26,7 +27,8 @@ class FractalResponseService
         $type,
         TransformerAbstract $transformer,
         ArraySerializer $serializer,
-        QueryBuilder $queryBuilder = null
+        QueryBuilder $queryBuilder = null,
+        $useSimpleIdPagination = false
     ) {
         $response = fractal(null, $transformer, $serializer);
 
@@ -39,9 +41,15 @@ class FractalResponseService
         }
 
         if (!is_null($queryBuilder)) {
+            $paginator = new Paginator($queryBuilder);
+
+            if ($useSimpleIdPagination) {
+                $paginator->setUseOutputWalkers(false);
+            }
+
             $response->paginateWith(
                 new DoctrinePaginatorAdapter(
-                    new Paginator($queryBuilder), [PaginationUrlGenerator::class, 'generate']
+                    $paginator, [PaginationUrlGenerator::class, 'generate']
                 )
             );
         }
