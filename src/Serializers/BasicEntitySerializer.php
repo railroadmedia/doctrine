@@ -3,6 +3,7 @@
 namespace Railroad\Doctrine\Serializers;
 
 use Carbon\Carbon;
+use DateTime;
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -20,7 +21,7 @@ class BasicEntitySerializer
 
         foreach ($dataArray as $fieldName => $value) {
 
-            if(mb_check_encoding($value) == false){
+            if (mb_check_encoding($value) == false) {
                 $value = utf8_encode($value);
             }
 
@@ -60,12 +61,23 @@ class BasicEntitySerializer
                     break;
                 case 'datetime':
                 case 'datetimetz':
-                    $dataArray[$fieldName] =
-                        $fieldValue instanceof Carbon ? $fieldValue->toDateTimeString() : $fieldValue;
+                    if ($fieldValue instanceof Carbon) {
+                        $dataArray[$fieldName] = $fieldValue->toDateTimeString();
+                    } elseif ($fieldValue instanceof DateTime) {
+                        $dataArray[$fieldName] = $fieldValue->format("Y-m-d H:i:s");
+                    } else {
+                        $dataArray[$fieldName] = null;
+                    }
 
                     break;
                 case 'date':
-                    $dataArray[$fieldName] = $fieldValue instanceof Carbon ? $fieldValue->toDateString() : $fieldValue;
+                    if ($fieldValue instanceof Carbon) {
+                        $dataArray[$fieldName] = $fieldValue->toDateString();
+                    } elseif ($fieldValue instanceof DateTime) {
+                        $dataArray[$fieldName] = $fieldValue->format("Y-m-d");
+                    } else {
+                        $dataArray[$fieldName] = null;
+                    }
 
                     break;
                 case 'time':
