@@ -19,5 +19,7 @@ class BasicEntitySerializerTest extends TestCase
         $serializer = new BasicEntitySerializer();
 
         $array = $serializer->serializeToUnderScores($user, $this->entityManager->getClassMetadata(User::class));
+
+        $this->assertIsArray($array);
     }
 }

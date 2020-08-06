@@ -19,6 +19,6 @@ class DomainTypesTest extends TestCase
         $this->entityManager->persist($resource);
         $this->entityManager->flush($resource);
 
-        dd($resource);
+        $this->assertTrue(true);
     }
 }
