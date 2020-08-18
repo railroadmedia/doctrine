@@ -21,7 +21,7 @@ class BasicEntitySerializer
 
         foreach ($dataArray as $fieldName => $value) {
 
-            if (mb_check_encoding($value) == false) {
+            if (is_string($value) && mb_check_encoding($value) == false) {
                 $value = utf8_encode($value);
             }
 
