@@ -14,7 +14,7 @@ class UserIdTypeTest extends TestCase
 {
     protected $databaseManager;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

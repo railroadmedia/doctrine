@@ -4,7 +4,8 @@ namespace Railroad\Doctrine\Serializers;
 
 use Carbon\Carbon;
 use DateTime;
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 class BasicEntitySerializer
@@ -16,6 +17,7 @@ class BasicEntitySerializer
      */
     public function serializeToUnderScores($entity, ClassMetadata $classMetadata)
     {
+        $inflector = InflectorFactory::create()->build();
         $dataArray = $this->serialize($entity, $classMetadata);
         $formattedArray = [];
 
@@ -25,7 +27,7 @@ class BasicEntitySerializer
                 $value = utf8_encode($value);
             }
 
-            $formattedArray[Inflector::tableize($fieldName)] = $value;
+            $formattedArray[$inflector->tableize($fieldName)] = $value;
         }
 
         return $formattedArray;

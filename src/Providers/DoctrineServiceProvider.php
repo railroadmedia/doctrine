@@ -5,9 +5,11 @@ namespace Railroad\Doctrine\Providers;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Annotations\IndexedReader;
+use Doctrine\Common\Annotations\PsrCachedReader;
+use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\EventManager;
-use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\DefaultCacheFactory;
 use Doctrine\ORM\Cache\RegionsConfiguration;
@@ -16,6 +18,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
+use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Gedmo\DoctrineExtensions;
 use Gedmo\Sortable\SortableListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -30,6 +33,7 @@ use Railroad\Doctrine\Types\Domain\TimezoneType;
 use Railroad\Doctrine\Types\Domain\UrlType;
 use Railroad\Doctrine\Types\Domain\UserIdType;
 use Redis;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 class DoctrineServiceProvider extends ServiceProvider
 {
@@ -75,18 +79,18 @@ class DoctrineServiceProvider extends ServiceProvider
             config('doctrine.redis_host'),
             config('doctrine.redis_port')
         );
-        $redisCache = new RedisCache();
-        $redisCache->setRedis($redis);
+        $redisCacheAdapter = new RedisAdapter($redis);
+        $doctrineRedisCache = DoctrineProvider::wrap($redisCacheAdapter);
 
         // redis cache instance is referenced in laravel container to be reused when needed
-        app()->instance(RedisCache::class, $redisCache);
-
         AnnotationRegistry::registerLoader('class_exists');
 
-        $annotationReader = new AnnotationReader();
+        $annotationReader = new IndexedReader(new AnnotationReader());
 
-        $cachedAnnotationReader = new CachedReader(
-            $annotationReader, $redisCache
+        $cachedAnnotationReader = new PsrCachedReader(
+            $annotationReader,
+            $redisCacheAdapter,
+            env('APP_DEBUG', false)
         );
 
         $driverChain = new MappingDriverChain();
@@ -124,10 +128,10 @@ class DoctrineServiceProvider extends ServiceProvider
         app()->instance(EventManager::class, $eventManager);
 
         $ormConfiguration = new Configuration();
-        $ormConfiguration->setMetadataCacheImpl($redisCache);
-        $ormConfiguration->setQueryCacheImpl($redisCache);
-        $ormConfiguration->setResultCacheImpl($redisCache);
-        $factory = new DefaultCacheFactory(new RegionsConfiguration(), $redisCache);
+        $ormConfiguration->setMetadataCache($redisCacheAdapter);
+        $ormConfiguration->setQueryCache($redisCacheAdapter);
+        $ormConfiguration->setResultCache($redisCacheAdapter);
+        $factory = new DefaultCacheFactory(new RegionsConfiguration(), $redisCacheAdapter);
         $ormConfiguration->setSecondLevelCacheEnabled();
         $ormConfiguration->getSecondLevelCacheConfiguration()->setCacheFactory($factory);
 
