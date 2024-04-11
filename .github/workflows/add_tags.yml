@@ -3,7 +3,7 @@ name: Add Tags
 on:
   push:
     branches:
-      - XX
+      - main
 
 jobs:
   auto-tag:
@@ -18,7 +18,7 @@ jobs:
         id: generate_id
         run: | 
           VERSION_PREFIX="v"  
-          VERSION_MAJOR_MINOR="X.Y"  
+          VERSION_MAJOR_MINOR="2.0"  
           git fetch --unshallow --tags
           VERSION_PATCH=$(git tag --list "${VERSION_PREFIX}${VERSION_MAJOR_MINOR}.*" --sort=-version:refname | head -n 1 | grep -oE '[0-9]+$')
           echo $VERSION_PATCH
