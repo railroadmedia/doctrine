@@ -8,6 +8,6 @@ on:
 
 jobs:
   auto-tag:
-    uses: railroadmedia/docusora/.github/workflows/add_tags.yml@add_tags
+    uses: railroadmedia/railenvironment/.github/workflows/add_tags.yml@add_tags
     with:
       version: "2.0"
