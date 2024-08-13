@@ -32,21 +32,19 @@ class TestCase extends BaseTestCase
         // Run the schema update tool using our entity metadata
         $this->entityManager = app(EntityManager::class);
 
-        $this->entityManager->getMetadataFactory()
-            ->getCacheDriver()
-            ->deleteAll();
+        $this->entityManager->getConfiguration()->getMetadataCache()->clear();
 
         // make sure laravel is using the same connection
         DB::connection()
             ->setPdo(
                 $this->entityManager->getConnection()
-                    ->getWrappedConnection()
+                    ->getNativeConnection()
             );
 
         DB::connection()
             ->setReadPdo(
                 $this->entityManager->getConnection()
-                    ->getWrappedConnection()
+                    ->getNativeConnection()
             );
 
         Schema::create(

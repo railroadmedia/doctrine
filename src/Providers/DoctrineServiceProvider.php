@@ -3,17 +3,11 @@
 namespace Railroad\Doctrine\Providers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\Common\Annotations\CachedReader;
-use Doctrine\Common\Annotations\IndexedReader;
 use Doctrine\Common\Annotations\PsrCachedReader;
-use Doctrine\Common\Cache\Psr6\DoctrineProvider;
-use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\DefaultCacheFactory;
 use Doctrine\ORM\Cache\RegionsConfiguration;
-use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
@@ -34,31 +28,20 @@ use Railroad\Doctrine\Types\Domain\UrlType;
 use Railroad\Doctrine\Types\Domain\UserIdType;
 use Redis;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
+use Doctrine\ORM\ORMSetup;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 
 class DoctrineServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap the application services.
-     *
-     * @return void
-     * @throws \Doctrine\DBAL\DBALException
-     */
     public function boot()
     {
         parent::boot();
     }
 
-    /**
-     * Register the application services.
-     *
-     * @return void
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\DBAL\DBALException
-     */
     public function register()
     {
-        // use Carbon for all date types
+        // Use Carbon for all date types
         Type::overrideType('datetime', CarbonDateTimeType::class);
         Type::overrideType('datetimetz', CarbonDateTimeTimezoneType::class);
         Type::overrideType('date', CarbonDateType::class);
@@ -70,27 +53,22 @@ class DoctrineServiceProvider extends ServiceProvider
         !Type::hasType('gender') ? Type::addType('gender', GenderType::class) : null;
         !Type::hasType(UserIdType::USER_ID_TYPE) ? Type::addType(UserIdType::USER_ID_TYPE, UserIdType::class) : null;
 
-        // set proxy dir to temp folder on server
         $proxyDir = sys_get_temp_dir();
 
-        // setup redis
+        // Setup redis
         $redis = new Redis();
         $redis->connect(
             config('doctrine.redis_host'),
             config('doctrine.redis_port')
         );
         $redisCacheAdapter = new RedisAdapter($redis);
-        $doctrineRedisCache = DoctrineProvider::wrap($redisCacheAdapter);
 
-        // redis cache instance is referenced in laravel container to be reused when needed
-        AnnotationRegistry::registerLoader('class_exists');
-
-        $annotationReader = new IndexedReader(new AnnotationReader());
-
+        // Setup annotation reader
+        $annotationReader = new AnnotationReader();
         $cachedAnnotationReader = new PsrCachedReader(
             $annotationReader,
             $redisCacheAdapter,
-            env('APP_DEBUG', false)
+            config('doctrine.development_mode')
         );
 
         $driverChain = new MappingDriverChain();
@@ -101,9 +79,7 @@ class DoctrineServiceProvider extends ServiceProvider
         );
 
         foreach (config('doctrine.entities') as $driverConfig) {
-            $annotationDriver = new AnnotationDriver(
-                $cachedAnnotationReader, $driverConfig['path']
-            );
+            $annotationDriver = new AnnotationDriver($cachedAnnotationReader, [$driverConfig['path']]);
 
             $driverChain->addDriver(
                 $annotationDriver,
@@ -111,12 +87,10 @@ class DoctrineServiceProvider extends ServiceProvider
             );
         }
 
-        // driver chain instance is referenced in laravel container to be reused when needed
         app()->instance(MappingDriverChain::class, $driverChain);
 
         $timestampableListener = new TimestampableListener();
         $timestampableListener->setAnnotationReader($cachedAnnotationReader);
-
         $sortableListener = new SortableListener();
         $sortableListener->setAnnotationReader($cachedAnnotationReader);
 
@@ -124,10 +98,14 @@ class DoctrineServiceProvider extends ServiceProvider
         $eventManager->addEventSubscriber($timestampableListener);
         $eventManager->addEventSubscriber($sortableListener);
 
-        // event manager instance is referenced in laravel container to be reused when needed
         app()->instance(EventManager::class, $eventManager);
 
-        $ormConfiguration = new Configuration();
+        $ormConfiguration = ORMSetup::createAnnotationMetadataConfiguration(
+            array_column(config('doctrine.entities'), 'path'),
+            config('doctrine.development_mode'),
+            $proxyDir,
+            $redisCacheAdapter
+        );
         $ormConfiguration->setMetadataCache($redisCacheAdapter);
         $ormConfiguration->setQueryCache($redisCacheAdapter);
         $ormConfiguration->setResultCache($redisCacheAdapter);
@@ -135,11 +113,7 @@ class DoctrineServiceProvider extends ServiceProvider
         $ormConfiguration->setSecondLevelCacheEnabled();
         $ormConfiguration->getSecondLevelCacheConfiguration()->setCacheFactory($factory);
 
-        $ormConfiguration->setProxyDir($proxyDir);
         $ormConfiguration->setProxyNamespace('DoctrineProxies');
-        $ormConfiguration->setAutoGenerateProxyClasses(
-            config('doctrine.development_mode')
-        );
         $ormConfiguration->setMetadataDriverImpl($driverChain);
         $ormConfiguration->setNamingStrategy(
             new UnderscoreNamingStrategy(CASE_LOWER)
@@ -148,32 +122,25 @@ class DoctrineServiceProvider extends ServiceProvider
         $ormConfiguration->addCustomStringFunction('MATCH_AGAINST','Railroad\\Doctrine\\Extensions\\Doctrine\\MatchAgainst');
         $ormConfiguration->addCustomStringFunction('UNIX_TIMESTAMP','Railroad\\Doctrine\\Extensions\\Doctrine\\UnixTimestamp');
 
-        // orm configuration instance is referenced in laravel container to be reused when needed
-        app()->instance(Configuration::class, $ormConfiguration);
+        app()->instance('Doctrine\ORM\Configuration', $ormConfiguration);
 
-        if (config('doctrine.database_in_memory') !== true) {
-            $databaseOptions = [
+        $databaseOptions = config('doctrine.database_in_memory') !== true
+            ? [
                 'driver' => config('doctrine.database_driver'),
                 'dbname' => config('doctrine.database_name'),
                 'user' => config('doctrine.database_user'),
                 'password' => config('doctrine.database_password'),
                 'host' => config('doctrine.database_host'),
-            ];
-        } else {
-            $databaseOptions = [
+            ]
+            : [
                 'driver' => config('doctrine.database_driver'),
                 'user' => config('doctrine.database_user'),
                 'password' => config('doctrine.database_password'),
                 'memory' => true,
             ];
-        }
 
-        // register the default entity manager
-        $entityManager = EntityManager::create(
-            $databaseOptions,
-            $ormConfiguration,
-            $eventManager
-        );
+        $connection = DriverManager::getConnection($databaseOptions, $ormConfiguration);
+        $entityManager = new EntityManager($connection, $ormConfiguration, $eventManager);
 
         $entityManager
             ->getConnection()
@@ -183,7 +150,6 @@ class DoctrineServiceProvider extends ServiceProvider
                 UserIdType::USER_ID_TYPE
             );
 
-        // register the entity manager as a singleton
         app()->instance(EntityManager::class, $entityManager);
         app()->instance(EntityManagerInterface::class, $entityManager);
     }

@@ -4,3 +4,4 @@ composer.lock
 vendor
 /.env.testing
 .phpunit*
+.codebuddy
